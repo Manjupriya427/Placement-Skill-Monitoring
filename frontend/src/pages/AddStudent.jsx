@@ -14,6 +14,8 @@ function AddStudent() {
     placementReadiness: "Not Assessed"
   });
 
+  const [error, setError] = useState("");
+{error && <p style={{ color: "red" }}>{error}</p>}
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,6 +25,7 @@ function AddStudent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const studentData = {
@@ -35,7 +38,7 @@ function AddStudent() {
       };
 
       await axios.post(
-        "http://localhost:5000/api/students",
+        "https://placement-skill-monitoring.onrender.com/api/students",
         studentData
       );
 
@@ -53,38 +56,56 @@ function AddStudent() {
       });
 
     } catch (error) {
-      alert(error.response?.data?.message || "Error adding student");
-    }
+  console.error("Add Student Error:", error);
+
+  setError(
+    error.response?.data?.message ||
+    error.message ||
+    "Error adding student"
+  );
+}
   };
 
   return (
     <div>
       <h1 className="page-title">Add Student</h1>
+
       <p className="page-description">
         Enter student details and placement skills.
       </p>
 
       <form className="content-card student-form" onSubmit={handleSubmit}>
-
         <h2>Student Information</h2>
 
         <div className="form-grid">
           <div className="form-group">
             <label>Student Name</label>
-            <input name="name" value={formData.name}
-              onChange={handleChange} required />
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>Register Number</label>
-            <input name="registerNumber" value={formData.registerNumber}
-              onChange={handleChange} required />
+            <input
+              name="registerNumber"
+              value={formData.registerNumber}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>Department</label>
-            <select name="department" value={formData.department}
-              onChange={handleChange} required>
+            <select
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              required
+            >
               <option value="">Select Department</option>
               <option value="IT">Information Technology</option>
               <option value="CSE">Computer Science</option>
@@ -96,8 +117,12 @@ function AddStudent() {
 
           <div className="form-group">
             <label>Year</label>
-            <select name="year" value={formData.year}
-              onChange={handleChange} required>
+            <select
+              name="year"
+              value={formData.year}
+              onChange={handleChange}
+              required
+            >
               <option value="">Select Year</option>
               <option value="1st Year">1st Year</option>
               <option value="2nd Year">2nd Year</option>
@@ -108,25 +133,36 @@ function AddStudent() {
 
           <div className="form-group">
             <label>Technical Skills</label>
-            <input name="technicalSkills"
+            <input
+              name="technicalSkills"
               value={formData.technicalSkills}
               onChange={handleChange}
-              placeholder="Python, Java, HTML" required />
+              placeholder="Python, Java, HTML"
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>Aptitude Score (0-100)</label>
-            <input type="number" name="aptitudeScore"
+            <input
+              type="number"
+              name="aptitudeScore"
               value={formData.aptitudeScore}
               onChange={handleChange}
-              min="0" max="100" required />
+              min="0"
+              max="100"
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>Communication Skills</label>
-            <select name="communicationSkills"
+            <select
+              name="communicationSkills"
               value={formData.communicationSkills}
-              onChange={handleChange} required>
+              onChange={handleChange}
+              required
+            >
               <option value="">Select Level</option>
               <option value="Excellent">Excellent</option>
               <option value="Good">Good</option>
@@ -137,9 +173,11 @@ function AddStudent() {
 
           <div className="form-group">
             <label>Placement Readiness</label>
-            <select name="placementReadiness"
+            <select
+              name="placementReadiness"
               value={formData.placementReadiness}
-              onChange={handleChange}>
+              onChange={handleChange}
+            >
               <option value="Not Assessed">Not Assessed</option>
               <option value="Ready">Ready</option>
               <option value="In Progress">In Progress</option>
@@ -148,10 +186,13 @@ function AddStudent() {
           </div>
         </div>
 
+        {error && (
+          <p className="status-message">{error}</p>
+        )}
+
         <button type="submit" className="primary-btn">
           Save Student
         </button>
-
       </form>
     </div>
   );

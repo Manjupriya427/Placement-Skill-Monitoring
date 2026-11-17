@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const API = "http://localhost:5000/api/students";
+const API = "https://placement-skill-monitoring.onrender.com/api/students";
 
 function StudentList() {
   const [students, setStudents] = useState([]);
@@ -15,9 +15,17 @@ function StudentList() {
   const fetchStudents = async () => {
     try {
       const response = await axios.get(API);
-      setStudents(response.data);
-      setMessage("");
-    } catch {
+
+      if (Array.isArray(response.data)) {
+        setStudents(response.data);
+        setMessage("");
+      } else {
+        setStudents([]);
+        setMessage("Invalid student data received from server.");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setStudents([]);
       setMessage("Unable to load student records.");
     }
   };
@@ -35,15 +43,20 @@ function StudentList() {
       await axios.delete(`${API}/${id}`);
       setMessage("Student deleted successfully.");
       fetchStudents();
-    } catch {
-      setMessage("Unable to delete student.");
+    } catch (error) {
+      console.error("Delete error:", error);
+      setMessage(
+        error.response?.data?.message || "Unable to delete student."
+      );
     }
   };
 
   const handleEdit = (student) => {
     setEditingStudent({
       ...student,
-      technicalSkills: student.technicalSkills.join(", ")
+      technicalSkills: Array.isArray(student.technicalSkills)
+        ? student.technicalSkills.join(", ")
+        : ""
     });
   };
 
@@ -72,12 +85,16 @@ function StudentList() {
       delete updatedStudent.createdAt;
       delete updatedStudent.updatedAt;
 
-      await axios.put(`${API}/${editingStudent._id}`, updatedStudent);
+      await axios.put(
+        `${API}/${editingStudent._id}`,
+        updatedStudent
+      );
 
       setEditingStudent(null);
       setMessage("Student updated successfully.");
       fetchStudents();
     } catch (error) {
+      console.error("Update error:", error);
       setMessage(
         error.response?.data?.message || "Unable to update student."
       );
@@ -85,7 +102,7 @@ function StudentList() {
   };
 
   const filteredStudents = students.filter((student) =>
-    `${student.name} ${student.registerNumber}`
+    `${student.name || ""} ${student.registerNumber || ""}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -130,7 +147,7 @@ function StudentList() {
             <div className="edit-grid">
               <input
                 name="name"
-                value={editingStudent.name}
+                value={editingStudent.name || ""}
                 onChange={handleEditChange}
                 placeholder="Student Name"
                 required
@@ -138,7 +155,7 @@ function StudentList() {
 
               <input
                 name="registerNumber"
-                value={editingStudent.registerNumber}
+                value={editingStudent.registerNumber || ""}
                 onChange={handleEditChange}
                 placeholder="Register Number"
                 required
@@ -146,7 +163,7 @@ function StudentList() {
 
               <input
                 name="department"
-                value={editingStudent.department}
+                value={editingStudent.department || ""}
                 onChange={handleEditChange}
                 placeholder="Department"
                 required
@@ -163,7 +180,7 @@ function StudentList() {
               <input
                 type="number"
                 name="aptitudeScore"
-                value={editingStudent.aptitudeScore}
+                value={editingStudent.aptitudeScore ?? ""}
                 onChange={handleEditChange}
                 min="0"
                 max="100"
@@ -173,10 +190,11 @@ function StudentList() {
 
               <select
                 name="communicationSkills"
-                value={editingStudent.communicationSkills}
+                value={editingStudent.communicationSkills || ""}
                 onChange={handleEditChange}
                 required
               >
+                <option value="">Select Communication Level</option>
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
                 <option value="Advanced">Advanced</option>
@@ -184,7 +202,7 @@ function StudentList() {
 
               <select
                 name="placementReadiness"
-                value={editingStudent.placementReadiness}
+                value={editingStudent.placementReadiness || ""}
                 onChange={handleEditChange}
                 required
               >
@@ -230,7 +248,11 @@ function StudentList() {
                     <td>{student.name}</td>
                     <td>{student.registerNumber}</td>
                     <td>{student.department}</td>
-                    <td>{student.technicalSkills.join(", ")}</td>
+                    <td>
+                      {Array.isArray(student.technicalSkills)
+                        ? student.technicalSkills.join(", ")
+                        : ""}
+                    </td>
                     <td>{student.aptitudeScore}/100</td>
                     <td>{student.communicationSkills}</td>
                     <td>{student.placementReadiness}</td>
