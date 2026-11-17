@@ -1,0 +1,13 @@
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+button, input, select {
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+}
